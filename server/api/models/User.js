@@ -32,9 +32,9 @@ module.exports = {
     username: {
       type: 'string',
       isNotEmptyString: true,
-      minLength: 3,
-      maxLength: 16,
-      regex: /^[a-zA-Z0-9]+((_|\.)?[a-zA-Z0-9])*$/,
+      // minLength: 3,
+      // maxLength: 16,
+      // regex: /^[a-zA-Z0-9]+((_|\.)?[a-zA-Z0-9])*$/,
       allowNull: true,
     },
     avatarDirname: {

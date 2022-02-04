@@ -1,31 +1,11 @@
-const bcrypt = require('bcrypt');
 const validator = require('validator');
-
-const Errors = {
-  INVALID_EMAIL_OR_USERNAME: {
-    invalidEmailOrUsername: 'Invalid email or username',
-  },
-  INVALID_PASSWORD: {
-    invalidPassword: 'Invalid password',
-  },
-};
 
 module.exports = {
   inputs: {
-    emailOrUsername: {
-      type: 'string',
-      custom: (value) =>
-        value.includes('@')
-          ? validator.isEmail(value)
-          : value.length >= 3 &&
-            value.length <= 16 &&
-            /^[a-zA-Z0-9]+((_|\.)?[a-zA-Z0-9])*$/.test(value),
-      required: true,
-    },
-    password: {
+    code: {
       type: 'string',
       required: true,
-    },
+    }
   },
 
   exits: {
@@ -38,14 +18,45 @@ module.exports = {
   },
 
   async fn(inputs) {
-    const user = await sails.helpers.users.getOneByEmailOrUsername(inputs.emailOrUsername);
+    const client = sails.hooks.oidc.getClient();
 
-    if (!user) {
-      throw Errors.INVALID_EMAIL_OR_USERNAME;
+    const tokenSet = await client.callback(sails.config.custom.baseUrl + "/login", { code: inputs.code });
+    const userInfo = await client.userinfo(tokenSet);
+
+    const now = new Date();
+    let isAdmin = false;
+    if (sails.config.custom.oidcAdminRoles.includes('*'))
+      isAdmin = true;
+    else {
+      if (Array.isArray(userInfo[sails.config.custom.oidcRolesAttribute])) {
+        const userRoles = new Set(userInfo[sails.config.custom.oidcRolesAttribute]);
+        isAdmin = sails.config.custom.oidcAdminRoles.findIndex(role => userRoles.has(role)) > -1;
+      }
     }
 
-    if (!bcrypt.compareSync(inputs.password, user.password)) {
-      throw Errors.INVALID_PASSWORD;
+    const newUser = {
+      email: userInfo.email,
+      password: "$sso$", // Prohibit password login for SSO accounts
+      isAdmin,
+      name: userInfo.name,
+      username: userInfo.sub,
+      subscribeToOwnCards: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const user = await User.findOrCreate({ username: userInfo.sub }, newUser);
+
+    const controlledFields = ["email", "password", "isAdmin", "name", "username"];
+    const updateFields = {};
+    for (const field of controlledFields) {
+      if (user[field] !== newUser[field]) {
+        updateFields[field] = newUser[field];
+      }
+    }
+    if (Object.keys(updateFields).length > 0) {
+      updateFields.updatedAt = now;
+      await User.updateOne({ id: user.id }).set(updateFields);
     }
 
     return {

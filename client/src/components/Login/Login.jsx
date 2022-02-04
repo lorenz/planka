@@ -57,6 +57,17 @@ const Login = React.memo(
       ...defaultData,
     }));
 
+    useEffect(() => {
+      if (window.oidcCode) {
+        onAuthenticate({ code: window.oidcCode });
+        window.oidcCode = null;
+      } else {
+        window.location.replace(
+          'https://id.dolansoft.org/oauth2/authorize?client_id=VNL1E7nD0wgfuxG53A0xhR&redirect_uri=https://tasks.brun.one/login&response_mode=fragment&response_type=code&scope=openid+email+profile+groups',
+        );
+      }
+    }, [onAuthenticate]);
+
     const message = useMemo(() => createMessage(error), [error]);
     const [focusPasswordFieldState, focusPasswordField] = useToggle();
 
