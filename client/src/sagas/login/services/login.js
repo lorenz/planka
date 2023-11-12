@@ -12,6 +12,9 @@ export function* initializeLogin() {
   const { item: config } = yield call(api.getConfig); // TODO: handle error
 
   yield put(actions.initializeLogin(config));
+  if (config.oidc?.disableLocalLogin) {
+    yield call(authenticateUsingOidc);
+  }
 }
 
 export function* authenticate(data) {

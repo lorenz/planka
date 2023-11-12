@@ -41,6 +41,8 @@ module.exports.custom = {
   oidcRolesAttribute: process.env.OIDC_ROLES_ATTRIBUTE || 'groups',
   oidcIgnoreRoles: process.env.OIDC_IGNORE_ROLES === 'true',
 
+  disableLocalLogin: process.env.DISABLE_LOCAL_LOGIN === 'true',
+
   // TODO: move client base url to environment variable?
   oidcRedirectUri: `${
     sails.config.environment === 'production' ? process.env.BASE_URL : 'http://localhost:3000'

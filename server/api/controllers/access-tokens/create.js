@@ -46,6 +46,9 @@ module.exports = {
   },
 
   async fn(inputs) {
+    if (sails.config.custom.disableLocalLogin) {
+      throw Errors.USE_SINGLE_SIGN_ON;
+    }
     const remoteAddress = getRemoteAddress(this.req);
 
     const user = await sails.helpers.users.getOneByEmailOrUsername(inputs.emailOrUsername);

@@ -39,6 +39,8 @@ services:
       # - DEFAULT_ADMIN_NAME=Demo Demo
       # - DEFAULT_ADMIN_USERNAME=demo
 
+      # - DISABLE_LOCAL_LOGIN=true # Only allow login via SSO/external systems
+
       # - OIDC_ISSUER=
       # - OIDC_CLIENT_ID=
       # - OIDC_CLIENT_SECRET=

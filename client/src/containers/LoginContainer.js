@@ -20,6 +20,7 @@ const mapStateToProps = (state) => {
     isSubmittingUsingOidc,
     error,
     withOidc: !!oidcConfig,
+    disableLocalLogin: !!(oidcConfig?.disableLocalLogin),
   };
 };
 

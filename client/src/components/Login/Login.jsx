@@ -71,6 +71,7 @@ const Login = React.memo(
     onAuthenticate,
     onAuthenticateUsingOidc,
     onMessageDismiss,
+    disableLocalLogin,
   }) => {
     const [t] = useTranslation();
     const wasSubmitting = usePrevious(isSubmitting);
@@ -159,42 +160,44 @@ const Login = React.memo(
                         onDismiss={onMessageDismiss}
                       />
                     )}
-                    <Form size="large" onSubmit={handleSubmit}>
-                      <div className={styles.inputWrapper}>
-                        <div className={styles.inputLabel}>{t('common.emailOrUsername')}</div>
-                        <Input
-                          fluid
-                          ref={emailOrUsernameField}
-                          name="emailOrUsername"
-                          value={data.emailOrUsername}
-                          readOnly={isSubmitting}
-                          className={styles.input}
-                          onChange={handleFieldChange}
+                    {!disableLocalLogin && (
+                      <Form size="large" onSubmit={handleSubmit}>
+                        <div className={styles.inputWrapper}>
+                          <div className={styles.inputLabel}>{t('common.emailOrUsername')}</div>
+                          <Input
+                            fluid
+                            ref={emailOrUsernameField}
+                            name="emailOrUsername"
+                            value={data.emailOrUsername}
+                            readOnly={isSubmitting}
+                            className={styles.input}
+                            onChange={handleFieldChange}
+                          />
+                        </div>
+                        <div className={styles.inputWrapper}>
+                          <div className={styles.inputLabel}>{t('common.password')}</div>
+                          <Input.Password
+                            fluid
+                            ref={passwordField}
+                            name="password"
+                            value={data.password}
+                            readOnly={isSubmitting}
+                            className={styles.input}
+                            onChange={handleFieldChange}
+                          />
+                        </div>
+                        <Form.Button
+                          primary
+                          size="large"
+                          icon="right arrow"
+                          labelPosition="right"
+                          content={t('action.logIn')}
+                          floated="right"
+                          loading={isSubmitting}
+                          disabled={isSubmitting || isSubmittingUsingOidc}
                         />
-                      </div>
-                      <div className={styles.inputWrapper}>
-                        <div className={styles.inputLabel}>{t('common.password')}</div>
-                        <Input.Password
-                          fluid
-                          ref={passwordField}
-                          name="password"
-                          value={data.password}
-                          readOnly={isSubmitting}
-                          className={styles.input}
-                          onChange={handleFieldChange}
-                        />
-                      </div>
-                      <Form.Button
-                        primary
-                        size="large"
-                        icon="right arrow"
-                        labelPosition="right"
-                        content={t('action.logIn')}
-                        floated="right"
-                        loading={isSubmitting}
-                        disabled={isSubmitting || isSubmittingUsingOidc}
-                      />
-                    </Form>
+                      </Form>
+                    )}
                     {withOidc && (
                       <Button
                         type="button"
